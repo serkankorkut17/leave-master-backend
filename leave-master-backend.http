@@ -1,0 +1,6 @@
+@leave_master_backend_HostAddress = http://localhost:5247
+
+GET {{leave_master_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

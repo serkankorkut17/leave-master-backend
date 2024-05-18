@@ -23,10 +23,12 @@ namespace leave_master_backend.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetUsers()
+        public async Task<IActionResult> GetUsers()
         {
-            var users = _dbContext.Users.ToList().Select(user => user.ToUserDto());
-            return Ok(users);
+            var users = await _dbContext.Users.ToListAsync();
+            
+            var usersDto = users.Select(user => user.ToUserDto());
+            return Ok(usersDto);
         }
 
         [HttpGet("{id}")]
@@ -73,6 +75,20 @@ namespace leave_master_backend.Controllers
             _dbContext.Users.Update(userInDb);
             await _dbContext.SaveChangesAsync();
             return Ok(userInDb.Id.ToString());
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            ObjectId objectId = new ObjectId(id);
+            var user = await _dbContext.Users.FindAsync(objectId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            _dbContext.Users.Remove(user);
+            await _dbContext.SaveChangesAsync();
+            return NoContent();
         }
     }
 }

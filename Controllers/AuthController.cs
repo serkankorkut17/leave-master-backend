@@ -10,6 +10,7 @@ using leave_master_backend.Dtos.User;
 using leave_master_backend.Mappers;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
+
 namespace leave_master_backend.Controllers
 {
     [Route("api/auth")]
@@ -31,7 +32,7 @@ namespace leave_master_backend.Controllers
             return Ok(usersDto);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:regex(^[[0-9a-fA-F]]{{24}}$)}")]
         public async Task<IActionResult> GetUser(string id)
         {
             ObjectId objectId = new ObjectId(id);
@@ -51,7 +52,7 @@ namespace leave_master_backend.Controllers
             return CreatedAtAction(nameof(GetUser), new { id = user.Id.ToString() }, user);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:regex(^[[0-9a-fA-F]]{{24}}$)}")]
         public async Task<IActionResult> UpdateUser([FromRoute] string id, [FromBody] UserDto user)
         {
             ObjectId objectId = new ObjectId(id);
@@ -77,7 +78,7 @@ namespace leave_master_backend.Controllers
             return Ok(userInDb.Id.ToString());
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:regex(^[[0-9a-fA-F]]{{24}}$)}")]
         public async Task<IActionResult> DeleteUser(string id)
         {
             ObjectId objectId = new ObjectId(id);

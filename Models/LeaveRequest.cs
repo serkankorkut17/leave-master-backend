@@ -13,8 +13,8 @@ namespace leave_master_backend.Models
     {
         public ObjectId Id { get; set; }
 
-        public ObjectId UserId { get; set; }
-        public required ApplicationUser User { get; set; }
+        // public ObjectId UserId { get; set; }
+        // public required ApplicationUser User { get; set; }
         public DateTime StartDate { get; set; }
 
         public DateTime EndDate { get; set; }
@@ -29,10 +29,10 @@ namespace leave_master_backend.Models
 
         public DateTime UpdatedAt { get; set; }
 
-        public ObjectId? ApproverId { get; set; }
-        public ApplicationUser? Approver { get; set; }
+        // public ObjectId? ApproverId { get; set; }
+        // public ApplicationUser? Approver { get; set; }
 
-        public string? ApproverComment { get; set; } = string.Empty;
+        // public string? ApproverComment { get; set; } = string.Empty;
 
     }
 }

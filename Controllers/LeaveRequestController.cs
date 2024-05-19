@@ -58,7 +58,7 @@ namespace leave_master_backend.Controllers
                 return NotFound();
             }
 
-            leaveRequestInDb.UserId = leaveRequest.UserId;
+            // leaveRequestInDb.UserId = leaveRequest.UserId;
             leaveRequestInDb.StartDate = leaveRequest.StartDate;
             leaveRequestInDb.EndDate = leaveRequest.EndDate;
             leaveRequestInDb.LeaveDays = leaveRequest.LeaveDays;
@@ -66,8 +66,8 @@ namespace leave_master_backend.Controllers
             leaveRequestInDb.Reason = leaveRequest.Reason;
             leaveRequestInDb.CreatedAt = leaveRequest.CreatedAt;
             leaveRequestInDb.UpdatedAt = leaveRequest.UpdatedAt;
-            leaveRequestInDb.ApproverId = leaveRequest.ApproverId;
-            leaveRequestInDb.ApproverComment = leaveRequest.ApproverComment;
+            // leaveRequestInDb.ApproverId = leaveRequest.ApproverId;
+            // leaveRequestInDb.ApproverComment = leaveRequest.ApproverComment;
 
             await _dbContext.SaveChangesAsync();
             return Ok(leaveRequestInDb);

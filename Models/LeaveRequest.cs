@@ -3,13 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Bson;
+using MongoDB.EntityFrameworkCore;
+using MongoDbGenericRepository.Attributes;
 
 namespace leave_master_backend.Models
 {
+    [CollectionName("LeaveRequests")]
     public class LeaveRequest
     {
         public ObjectId Id { get; set; }
-        public string UserId { get; set; } = string.Empty;//change to ObjectId
+
+        public ObjectId UserId { get; set; }
+        public required ApplicationUser User { get; set; }
         public DateTime StartDate { get; set; }
 
         public DateTime EndDate { get; set; }
@@ -24,7 +29,8 @@ namespace leave_master_backend.Models
 
         public DateTime UpdatedAt { get; set; }
 
-        public string? ApproverId { get; set; } = string.Empty;//change to ObjectId
+        public ObjectId? ApproverId { get; set; }
+        public ApplicationUser? Approver { get; set; }
 
         public string? ApproverComment { get; set; } = string.Empty;
 

@@ -130,3 +130,7 @@ C:\Users\srknk\OneDrive\Belgeler\Visual Studio Code\SW Project\leave-master-back
 C:\Users\srknk\OneDrive\Belgeler\Visual Studio Code\SW Project\leave-master-backend\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.Workspaces.resources.dll
 C:\Users\srknk\OneDrive\Belgeler\Visual Studio Code\SW Project\leave-master-backend\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll
 C:\Users\srknk\OneDrive\Belgeler\Visual Studio Code\SW Project\leave-master-backend\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\srknk\OneDrive\Belgeler\Visual Studio Code\SW Project\leave-master-backend\bin\Debug\net8.0\AspNetCore.Identity.Mongo.dll
+C:\Users\srknk\OneDrive\Belgeler\Visual Studio Code\SW Project\leave-master-backend\bin\Debug\net8.0\AspNetCore.Identity.MongoDbCore.dll
+C:\Users\srknk\OneDrive\Belgeler\Visual Studio Code\SW Project\leave-master-backend\bin\Debug\net8.0\MongoDbGenericRepository.dll
+C:\Users\srknk\OneDrive\Belgeler\Visual Studio Code\SW Project\leave-master-backend\bin\Debug\net8.0\System.Security.Permissions.dll

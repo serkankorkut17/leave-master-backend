@@ -1,95 +1,136 @@
-// using System;
-// using System.Collections.Generic;
-// using System.Linq;
-// using System.Threading.Tasks;
-// using Microsoft.AspNetCore.Mvc;
-// using leave_master_backend.Context;
-// using Microsoft.EntityFrameworkCore;
-// using MongoDB.Bson;
-// using leave_master_backend.Dtos.User;
-// using leave_master_backend.Mappers;
-// using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using leave_master_backend.Dtos.Auth;
+using leave_master_backend.Models;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using System.Text;
+using leave_master_backend.Interfaces;
 
+namespace leave_master_backend.Controllers
+{
+    [Microsoft.AspNetCore.Mvc.Route("api/auth")]
+    [ApiController]
+    public class AuthController : ControllerBase
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly ITokenService _tokenService;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-// namespace leave_master_backend.Controllers
-// {
-//     [Route("api/auth")]
-//     [ApiController]
-//     public class AuthController : ControllerBase
-//     {
-//         private readonly MongoDBContext _dbContext;
-//         public AuthController(MongoDBContext dbContext)
-//         {
-//             _dbContext = dbContext;
-//         }
+        public AuthController(UserManager<ApplicationUser> userManager, ITokenService tokenService, RoleManager<ApplicationRole> roleManager, SignInManager<ApplicationUser> signInManager)
+        {
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _tokenService = tokenService;
+            _signInManager = signInManager;
+        }
 
-//         [HttpGet]
-//         public async Task<IActionResult> GetUsers()
-//         {
-//             var users = await _dbContext.Users.ToListAsync();
-            
-//             var usersDto = users.Select(user => user.ToUserDto());
-//             return Ok(usersDto);
-//         }
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
 
-//         [HttpGet("{id:regex(^[[0-9a-fA-F]]{{24}}$)}")]
-//         public async Task<IActionResult> GetUser(string id)
-//         {
-//             ObjectId objectId = new ObjectId(id);
-//             var user = await _dbContext.Users.FindAsync(objectId);
-//             if (user == null)
-//             {
-//                 return NotFound();
-//             }
-//             return Ok(user.ToUserDto());
-//         }
+                if (registerDto.Password != registerDto.ConfirmPassword)
+                {
+                    return BadRequest("Passwords do not match");
+                }
 
-//         [HttpPost]
-//         public async Task<IActionResult> CreateUser([FromBody] Models.User user)
-//         {
-//             await _dbContext.Users.AddAsync(user);
-//             await _dbContext.SaveChangesAsync();
-//             return CreatedAtAction(nameof(GetUser), new { id = user.Id.ToString() }, user);
-//         }
+                if (!await _roleManager.RoleExistsAsync("User"))
+                {
+                    await _roleManager.CreateAsync(new ApplicationRole { Name = "User" });
 
-//         [HttpPut("{id:regex(^[[0-9a-fA-F]]{{24}}$)}")]
-//         public async Task<IActionResult> UpdateUser([FromRoute] string id, [FromBody] UserDto user)
-//         {
-//             ObjectId objectId = new ObjectId(id);
-//             var userInDb = await _dbContext.Users.FindAsync(objectId);
+                }
 
-//             if (userInDb == null)
-//             {
-//                 return NotFound();
-//             }
-//             // change only if the value is not null or empty string!!!!!!!!!!!!!!!!!!!!!!
+                var user = new ApplicationUser
+                {
+                    Email = registerDto.Email,
+                    UserName = registerDto.Email,
+                    FirstName = registerDto.FirstName ?? "",
+                    LastName = registerDto.LastName ?? "",
+                    StartDate = registerDto.StartDate.HasValue ? (DateTime)registerDto.StartDate : DateTime.MinValue
+                };
 
-//             userInDb.FirstName = user.FirstName ?? userInDb.FirstName;
-//             userInDb.LastName = user.LastName ?? userInDb.LastName;
-//             userInDb.Email = user.Email ?? userInDb.Email;
-//             userInDb.Password = user.Password ?? userInDb.Password;
-//             userInDb.Role = user.Role ?? userInDb.Role;
+                if (registerDto.Password is null)
+                {
+                    return BadRequest("Password cannot be null");
+                }
 
-//             // userInDb.StartDate = user.StartDate; 
-//             userInDb.UsedLeaveDaysPerYear = user.UsedLeaveDaysPerYear ?? userInDb.UsedLeaveDaysPerYear;
+                var createdUser = await _userManager.CreateAsync(user, registerDto.Password);
 
-//             _dbContext.Users.Update(userInDb);
-//             await _dbContext.SaveChangesAsync();
-//             return Ok(userInDb.Id.ToString());
-//         }
+                if (createdUser.Succeeded)
+                {
+                    var roleResult = await _userManager.AddToRoleAsync(user, "User");
+                    
+                    if (roleResult.Succeeded)
+                    {
+                        return Ok(new NewUserDto
+                        {
+                            Email = user.Email,
+                            FirstName = user.FirstName,
+                            LastName = user.LastName,
+                            Token = _tokenService.CreateToken(user)
+                        });
+                    }
+                    else
+                    {
+                        return BadRequest(roleResult.Errors);
+                    }
+                }
+                else
+                {
+                    return BadRequest(createdUser.Errors);
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
 
-//         [HttpDelete("{id:regex(^[[0-9a-fA-F]]{{24}}$)}")]
-//         public async Task<IActionResult> DeleteUser(string id)
-//         {
-//             ObjectId objectId = new ObjectId(id);
-//             var user = await _dbContext.Users.FindAsync(objectId);
-//             if (user == null)
-//             {
-//                 return NotFound();
-//             }
-//             _dbContext.Users.Remove(user);
-//             await _dbContext.SaveChangesAsync();
-//             return NoContent();
-//         }
-//     }
-// }
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+        {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(loginDto.Email);
+
+                if (user is null)
+                {
+                    return Unauthorized("Invalid email or password");
+                }
+
+                var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
+
+                if(!result.Succeeded)
+                {
+                    return Unauthorized("Invalid email or password");
+                }
+
+                return Ok(new NewUserDto
+                {
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Token = _tokenService.CreateToken(user)
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+    }
+}

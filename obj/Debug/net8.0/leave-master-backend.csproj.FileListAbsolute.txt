@@ -270,3 +270,9 @@ C:/Users/srknk/OneDrive/Belgeler/Visual Studio Code/SW Project/leave-master-back
 /Users/serkankorkut/Documents/VSCode/Software Project/leave-master-backend/obj/Debug/net8.0/leave-master-backend.pdb
 /Users/serkankorkut/Documents/VSCode/Software Project/leave-master-backend/obj/Debug/net8.0/leave-master-backend.genruntimeconfig.cache
 /Users/serkankorkut/Documents/VSCode/Software Project/leave-master-backend/obj/Debug/net8.0/ref/leave-master-backend.dll
+/Users/serkankorkut/Documents/VSCode/Software Project/leave-master-backend/bin/Debug/net8.0/Newtonsoft.Json.dll
+/Users/serkankorkut/Documents/VSCode/Software Project/leave-master-backend/bin/Debug/net8.0/SendGrid.dll
+/Users/serkankorkut/Documents/VSCode/Software Project/leave-master-backend/bin/Debug/net8.0/StarkbankEcdsa.dll
+/Users/serkankorkut/Documents/VSCode/Software Project/leave-master-backend/bin/Debug/net8.0/BouncyCastle.Cryptography.dll
+/Users/serkankorkut/Documents/VSCode/Software Project/leave-master-backend/bin/Debug/net8.0/MailKit.dll
+/Users/serkankorkut/Documents/VSCode/Software Project/leave-master-backend/bin/Debug/net8.0/MimeKit.dll

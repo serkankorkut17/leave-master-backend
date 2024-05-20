@@ -20,13 +20,15 @@ namespace leave_master_backend.Controllers
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly ITokenService _tokenService;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly EmailService _emailService;
 
-        public AuthController(UserManager<ApplicationUser> userManager, ITokenService tokenService, RoleManager<ApplicationRole> roleManager, SignInManager<ApplicationUser> signInManager)
+        public AuthController(UserManager<ApplicationUser> userManager, ITokenService tokenService, RoleManager<ApplicationRole> roleManager, SignInManager<ApplicationUser> signInManager, EmailService emailService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _tokenService = tokenService;
             _signInManager = signInManager;
+            _emailService = emailService;
         }
 
         [HttpPost("register")]
@@ -69,7 +71,7 @@ namespace leave_master_backend.Controllers
                 if (createdUser.Succeeded)
                 {
                     var roleResult = await _userManager.AddToRoleAsync(user, "User");
-                    
+
                     if (roleResult.Succeeded)
                     {
                         return Ok(new NewUserDto
@@ -99,7 +101,7 @@ namespace leave_master_backend.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
@@ -114,7 +116,7 @@ namespace leave_master_backend.Controllers
 
                 var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
 
-                if(!result.Succeeded)
+                if (!result.Succeeded)
                 {
                     return Unauthorized("Invalid email or password");
                 }
@@ -132,5 +134,64 @@ namespace leave_master_backend.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpPost("reset-password-request")]
+        public async Task<IActionResult> ResetPasswordRequest([FromBody] ResetPasswordRequestDto resetPasswordRequestDto)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(resetPasswordRequestDto.Email);
+                if (user == null)
+                {
+                    return BadRequest("Invalid email");
+                }
+
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var resetLink = Url.Action("ResetPassword", "Auth", new { token = token, email = user.Email }, Request.Scheme);
+
+                // Construct the plain text message with the reset link
+                var message = $"Please reset your password by copying and pasting the following link into your browser: {resetLink}";
+
+                // Send the plain text email
+                // await _emailService.SendEmailAsync(user.Email, "Password Reset Request", message);
+                await _emailService.SendEmail2Async(user.Email, "Password Reset Request", resetLink);
+
+                return Ok("Password reset request sent successfully");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
+
+        // [HttpPost("reset-password")]
+        // public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
+        // {
+        //     try
+        //     {
+        //         var user = await _userManager.FindByEmailAsync(resetPasswordDto.Email);
+        //         if (user == null)
+        //         {
+        //             return BadRequest("Invalid email");
+        //         }
+
+        //         var result = await _userManager.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.NewPassword);
+        //         if (result.Succeeded)
+        //         {
+        //             return Ok("Password reset successful");
+        //         }
+        //         else
+        //         {
+        //             // You can return specific error messages based on the result.Errors if needed
+        //             return BadRequest("Failed to reset password");
+        //         }
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return StatusCode(500, ex.Message);
+        //     }
+        // }
     }
 }

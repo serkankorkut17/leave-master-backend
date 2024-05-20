@@ -56,6 +56,9 @@ internal class Program
             };
         });
 
+        // Add email service
+        builder.Services.AddTransient<EmailService>();
+
         // Add services to the container.
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddControllers();

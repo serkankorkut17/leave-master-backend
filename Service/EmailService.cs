@@ -15,8 +15,11 @@ public class EmailService
     public async Task SendEmailAsync(string toEmail, string subject, string htmlContent)
     {
         var apiKey = _configuration["SendGridSettings:ApiKey"];
+        var fromEmail = _configuration["SendGridSettings:FromEmail"];
+        var fromName = _configuration["SendGridSettings:FromName"];
         var client = new SendGridClient(apiKey);
-        var from = new EmailAddress("gkblackfyre@gmail.com", "leave-master");
+        // var from = new EmailAddress("leave-master@outlook.com", "Leave Master");
+        var from = new EmailAddress(fromEmail, fromName);
         var to = new EmailAddress(toEmail);
         var msg = MailHelper.CreateSingleEmail(from, to, subject, "", htmlContent);
 

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("leave-master-backend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7fb575ea753f2ab729f08a582448e69e90df426e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3962aed4bd4615b36f7878f2906e5ee6307f0bd7")]
 [assembly: System.Reflection.AssemblyProductAttribute("leave-master-backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("leave-master-backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

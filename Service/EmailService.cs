@@ -12,14 +12,20 @@ public class EmailService
         _configuration = configuration;
     }
 
-    public async Task SendEmailAsync(string toEmail, string subject, string message)
+    public async Task SendEmailAsync(string toEmail, string subject, string htmlContent)
     {
         var apiKey = _configuration["SendGridSettings:ApiKey"];
         var client = new SendGridClient(apiKey);
         var from = new EmailAddress("gkblackfyre@gmail.com", "leave-master");
         var to = new EmailAddress(toEmail);
-        var msg = MailHelper.CreateSingleEmail(from, to, subject, message, message);
+        var msg = MailHelper.CreateSingleEmail(from, to, subject, "", htmlContent);
+
         var response = await client.SendEmailAsync(msg);
+
+        if (response.StatusCode != System.Net.HttpStatusCode.OK && response.StatusCode != System.Net.HttpStatusCode.Accepted)
+        {
+            throw new InvalidOperationException($"Failed to send email: {response.StatusCode}");
+        }
     }
 
     public async Task SendEmail2Async(string toEmail, string subject, string link)

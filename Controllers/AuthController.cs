@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using leave_master_backend.Interfaces;
+using System.Web;
 
 namespace leave_master_backend.Controllers
 {
@@ -46,10 +47,20 @@ namespace leave_master_backend.Controllers
                     return BadRequest("Passwords do not match");
                 }
 
-                if (!await _roleManager.RoleExistsAsync("User"))
+                if (await _userManager.FindByEmailAsync(registerDto.Email) != null)
                 {
-                    await _roleManager.CreateAsync(new ApplicationRole { Name = "User" });
+                    return BadRequest("Email already exists");
+                }
 
+                // if (!await _roleManager.RoleExistsAsync("User"))
+                // {
+                //     await _roleManager.CreateAsync(new ApplicationRole { Name = "User" });
+
+                // }
+
+                if (!await _roleManager.RoleExistsAsync(registerDto.EmployeeRole))
+                {
+                    await _roleManager.CreateAsync(new ApplicationRole { Name = registerDto.EmployeeRole });
                 }
 
                 var user = new ApplicationUser
@@ -70,7 +81,8 @@ namespace leave_master_backend.Controllers
 
                 if (createdUser.Succeeded)
                 {
-                    var roleResult = await _userManager.AddToRoleAsync(user, "User");
+                    // var roleResult = await _userManager.AddToRoleAsync(user, "User");
+                    var roleResult = await _userManager.AddToRoleAsync(user, registerDto.EmployeeRole);
 
                     if (roleResult.Succeeded)
                     {
@@ -147,14 +159,24 @@ namespace leave_master_backend.Controllers
                 }
 
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var resetLink = Url.Action("ResetPassword", "Auth", new { token = token, email = user.Email }, Request.Scheme);
 
-                // Construct the plain text message with the reset link
-                var message = $"Please reset your password by copying and pasting the following link into your browser: {resetLink}";
+                var encodedToken = HttpUtility.UrlEncode(token);
+                var encodedEmail = HttpUtility.UrlEncode(user.Email);
+                var resetLink = $"http://localhost:3000/reset-password/{encodedToken}/{encodedEmail}";
 
-                // Send the plain text email
-                // await _emailService.SendEmailAsync(user.Email, "Password Reset Request", message);
-                await _emailService.SendEmail2Async(user.Email, "Password Reset Request", resetLink);
+
+                // Log the values used for URL generation
+                Console.WriteLine($"Generating reset link for token: {token} and email: {user.Email}");
+
+                // var resetLink = $"http://localhost:3000/reset-password/{token}/{user.Email}";
+
+                // var resetLink = Url.Action("ResetPassword", "Auth", new { token = token, email = user.Email }, Request.Scheme);
+
+                // Log the generated reset link
+                Console.WriteLine($"Reset Link: {resetLink}");
+
+                var message = $"Please reset your password by clicking <a href='{resetLink}'>here</a>.";
+                await _emailService.SendEmailAsync(user.Email, "Password Reset Request", message);
 
                 return Ok("Password reset request sent successfully");
             }
@@ -164,34 +186,44 @@ namespace leave_master_backend.Controllers
             }
         }
 
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
+        {
+            try
+            {
+                // print resetPasswordDto
+                Console.WriteLine(resetPasswordDto.Email);
+                Console.WriteLine(resetPasswordDto.Password);
+                Console.WriteLine(resetPasswordDto.ConfirmPassword);
+                Console.WriteLine(resetPasswordDto.Token);
 
+                var user = await _userManager.FindByEmailAsync(resetPasswordDto.Email);
+                if (user == null)
+                {
+                    return BadRequest("Invalid email");
+                }
 
-        // [HttpPost("reset-password")]
-        // public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
-        // {
-        //     try
-        //     {
-        //         var user = await _userManager.FindByEmailAsync(resetPasswordDto.Email);
-        //         if (user == null)
-        //         {
-        //             return BadRequest("Invalid email");
-        //         }
+                if (resetPasswordDto.Password != resetPasswordDto.ConfirmPassword)
+                {
+                    return BadRequest("Passwords do not match");
+                }
 
-        //         var result = await _userManager.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.NewPassword);
-        //         if (result.Succeeded)
-        //         {
-        //             return Ok("Password reset successful");
-        //         }
-        //         else
-        //         {
-        //             // You can return specific error messages based on the result.Errors if needed
-        //             return BadRequest("Failed to reset password");
-        //         }
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return StatusCode(500, ex.Message);
-        //     }
-        // }
+                var result = await _userManager.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.Password);
+
+                if (result.Succeeded)
+                {
+                    return Ok("Password reset successfully");
+                }
+                else
+                {
+                    return BadRequest(result.Errors);
+                }
+                Console.WriteLine(result.Errors);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }

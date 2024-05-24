@@ -21,6 +21,6 @@ namespace leave_master_backend.Dtos.Auth
         public string? LastName { get; set; }
         [Required]
         public DateTime? StartDate { get; set; }
-        public string EmployeeRole { get; set; }
+        public string? EmployeeRole { get; set; }
     }
 }

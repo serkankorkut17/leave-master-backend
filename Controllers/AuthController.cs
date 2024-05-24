@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using leave_master_backend.Dtos.Auth;
 using leave_master_backend.Models;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
@@ -13,7 +12,7 @@ using System.Web;
 
 namespace leave_master_backend.Controllers
 {
-    [Microsoft.AspNetCore.Mvc.Route("api/auth")]
+    [Route("api/auth")]
     [ApiController]
     public class AuthController : ControllerBase
     {
@@ -218,7 +217,6 @@ namespace leave_master_backend.Controllers
                 {
                     return BadRequest(result.Errors);
                 }
-                Console.WriteLine(result.Errors);
             }
             catch (Exception ex)
             {

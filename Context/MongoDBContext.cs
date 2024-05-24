@@ -15,7 +15,7 @@ namespace leave_master_backend.Context
     {
         public MongoDBContext(DbContextOptions<MongoDBContext> options) : base(options)
         {
-            
+
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -29,6 +29,35 @@ namespace leave_master_backend.Context
             // };
             // modelBuilder.Entity<IdentityRole>().ToCollection("Roles");
 
+            // modelBuilder.Entity<LeaveRequest>(x => ).ToCollection("LeaveRequests");
+            modelBuilder.Entity<LeaveRequest>().HasKey(lr => lr.Id);
+
+            modelBuilder.Entity<LeaveRequest>().Property(lr => lr.UserName).IsRequired();
+
+            modelBuilder.Entity<LeaveRequest>().Property(lr => lr.StartDate).IsRequired();
+
+            modelBuilder.Entity<LeaveRequest>().Property(lr => lr.EndDate).IsRequired();
+
+            modelBuilder.Entity<LeaveRequest>()
+                .Property(lr => lr.LeaveDays)
+                .IsRequired();
+
+            modelBuilder.Entity<LeaveRequest>()
+                .Property(lr => lr.Status)
+                .IsRequired();
+
+            modelBuilder.Entity<LeaveRequest>()
+                .Property(lr => lr.Reason)
+                .IsRequired();
+
+            modelBuilder.Entity<LeaveRequest>()
+                .Property(lr => lr.CreatedAt)
+                .IsRequired();
+
+            modelBuilder.Entity<LeaveRequest>()
+                .Property(lr => lr.UpdatedAt)
+                .IsRequired();
+                
             modelBuilder.Entity<LeaveRequest>().ToCollection("LeaveRequests");
         }
 

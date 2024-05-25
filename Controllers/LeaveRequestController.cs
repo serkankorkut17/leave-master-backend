@@ -21,7 +21,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 
 
 
@@ -81,6 +80,54 @@ namespace leave_master_backend.Controllers
             }
 
             return Ok(leaveRequest);
+        }
+
+        // get max leave days from user
+        [HttpGet("max-leave-days")]
+        [Authorize]
+        public async Task<IActionResult> GetMaxLeaveDays()
+        {
+            // Ensure user is authenticated
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+
+            var username = User.Identity.Name;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found in claims");
+            }
+
+            var user = await _userManager.FindByNameAsync(username);
+            if (user == null)
+            {
+                return BadRequest("User not found");
+            }
+
+            var timeSpan = DateTime.Now - user.StartDate;
+            var yearsOfWork = timeSpan.Days / 365;
+            var maxLeaveDays = 0;
+
+            if (yearsOfWork >= 1 && yearsOfWork < 5)
+            {
+                maxLeaveDays = 14;
+            }
+            else if (yearsOfWork >= 5 && yearsOfWork < 15)
+            {
+                maxLeaveDays = 20;
+            }
+            else if (yearsOfWork >= 15)
+            {
+                maxLeaveDays = 26;
+            }
+
+            int usedLeaveDays = user.UsedLeaveDaysPerYear.FirstOrDefault(kvp => kvp.Key == DateTime.Now.Year).Value;
+
+            maxLeaveDays -= usedLeaveDays;
+
+            return Ok(maxLeaveDays);
         }
 
         //** CREATE LEAVE REQUEST FOR EMPLOYEE **//

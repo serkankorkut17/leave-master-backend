@@ -373,17 +373,25 @@ namespace leave_master_backend.Controllers
             }
 
             string recommendation;
-            if (sameRoleCollisions > 0)
+            if (sameRoleCollisions > 3)
             {
-                recommendation = "It is recommended to refuse the leave request due to overlapping leaves in the same role.";
+                recommendation = "High overlap: Strongly recommend refusing the leave request due to multiple overlapping leaves in the same role.";
             }
-            else if (differentRoleCollisions > 0)
+            else if (sameRoleCollisions > 0)
             {
-                recommendation = "The employee can leave, but there are overlapping leaves in different roles.";
+                recommendation = "Moderate overlap: Consider refusing the leave request due to some overlapping leaves in the same role.";
+            }
+            else if (differentRoleCollisions > 5)
+            {
+                recommendation = "High overlap in different roles: Recommend discussing with the employee due to significant overlapping leaves in different roles.";
+            }
+            else if (differentRoleCollisions > 2)
+            {
+                recommendation = "Moderate overlap in different roles: Leave request can be approved, but be aware of some overlapping leaves in different roles.";
             }
             else
             {
-                recommendation = "The employee can leave with no overlapping leaves found.";
+                recommendation = "No significant overlap: Leave request can be approved with no significant overlapping leaves found.";
             }
 
             return Ok(new

@@ -207,6 +207,9 @@ namespace leave_master_backend.Controllers
             // Get the value of the nullable DateTime
             DateTime startDate = createLeaveRequestDto.StartDate.Value;
             DateTime endDate = createLeaveRequestDto.EndDate.Value;
+            // add 3 hours for each date
+            startDate = startDate.AddHours(3);
+            endDate = endDate.AddHours(3);
 
             // Initialize the leave days count
             int leaveDaysCount = 0;

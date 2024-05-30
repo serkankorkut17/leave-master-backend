@@ -15,6 +15,7 @@ using System.Web;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using MongoDB.Bson;
 using leave_master_backend.Dtos;
+using leave_master_backend.Dtos.User;
 
 namespace leave_master_backend.Controllers
 {
@@ -52,16 +53,39 @@ namespace leave_master_backend.Controllers
                 return BadRequest("User not found");
             }
 
-            if (await _userManager.IsInRoleAsync(user, "Admin"))
-            {
-                var users = await _userManager.Users.ToListAsync();
-                return Ok(users);
-            }
-            else
+            if (!await _userManager.IsInRoleAsync(user, "Admin"))
             {
                 return Unauthorized();
             }
+
+            var users = await _userManager.Users.ToListAsync();
+
+
+            return Ok(users);
+            // else
+            // {
+            //     var nonAdminUsers = new List<ApplicationUser>();
+
+            //     foreach (var u in users)
+            //     {
+            //         if (!await _userManager.IsInRoleAsync(u, "Admin"))
+            //         {
+            //             nonAdminUsers.Add(u);
+            //         }
+            //     }
+
+            //     var usersDto = nonAdminUsers.Select(u => new UserDto
+            //     {
+            //         FirstName = u.FirstName,
+            //         LastName = u.LastName,
+            //         Email = u.Email,
+            //         StartDate = u.StartDate
+            //     }).ToList();
+
+            //     return Ok(usersDto);
+            // }
         }
+
 
         [HttpGet("{username}")]
         [Authorize]

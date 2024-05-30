@@ -93,6 +93,8 @@ namespace leave_master_backend.Controllers
 
                 if (createdUser.Succeeded)
                 {
+                    // delete the code from NewEmployeeInfo collection
+                    _dbContext.NewEmployeeInfos.Remove(employeeInfo);
                     // var roleResult = await _userManager.AddToRoleAsync(user, "User");
                     var roleResult = await _userManager.AddToRoleAsync(user, registerDto.EmployeeRole);
 

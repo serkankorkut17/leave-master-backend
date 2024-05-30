@@ -305,53 +305,95 @@ namespace leave_master_backend.Controllers
             return Ok();
         }
 
-        //** COMPLETE LEAVE REQUEST FOR EMPLOYEE **//
-        // [HttpPut("{id:regex(^[[0-9a-fA-F]]{{24}}$)}")]
-        // [Authorize]
-        // public async Task<IActionResult> CompleteLeaveRequest(string id, [FromBody] CompleteLeaveRequestDto completeLeaveRequestDto)
-        // {
-        //     // Ensure user is authenticated
-        //     if (!User.Identity.IsAuthenticated)
-        //     {
-        //         return Unauthorized();
-        //     }
+        [HttpGet("{id:regex(^[[0-9a-fA-F]]{{24}}$)}")]
+        [Authorize]
+        public async Task<IActionResult> GetLeaveRequestById(string id)
+        {
+            var username = User.Identity.Name;
 
-        //     var username = User.Identity.Name;
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found in claims");
+            }
 
-        //     if (string.IsNullOrEmpty(username))
-        //     {
-        //         return BadRequest("Username not found in claims");
-        //     }
+            // Check if the user is an admin
+            var admin = await _userManager.FindByNameAsync(username);
+            if (admin == null)
+            {
+                return BadRequest("Admin not found");
+            }
 
-        //     var user = await _userManager.FindByNameAsync(username);
-        //     if (user == null)
-        //     {
-        //         return BadRequest("User not found");
-        //     }
+            if (!await _userManager.IsInRoleAsync(admin, "Admin"))
+            {
+                return Unauthorized("User is not authorized to approve leave requests");
+            }
 
-        //     var leaveRequest = await _dbContext.LeaveRequests.FindAsync(new ObjectId(id));
+            var leaveRequest = await _dbContext.LeaveRequests.FindAsync(new ObjectId(id));
+            if (leaveRequest == null)
+            {
+                return NotFound("Leave request not found");
+            }
 
-        //     if (leaveRequest == null)
-        //     {
-        //         return NotFound();
-        //     }
+            var user = await _userManager.FindByNameAsync(leaveRequest.UserName);
+            if (user == null)
+            {
+                return BadRequest("User not found");
+            }
 
-        //     if (leaveRequest.UserName != user.UserName)
-        //     {
-        //         return Unauthorized();
-        //     }
+            var userRoles = await _userManager.GetRolesAsync(user);
+            if (userRoles == null || !userRoles.Any())
+            {
+                return BadRequest("User role not found");
+            }
 
-        //     if (leaveRequest.Status != "Pending")
-        //     {
-        //         return BadRequest("Leave request is not pending");
-        //     }
+            var userRole = userRoles[0];
 
-        //     leaveRequest.Status = completeLeaveRequestDto.Status;
-        //     leaveRequest.UpdatedAt = DateTime.Now;
+            var allLeaves = await _dbContext.Leaves.ToListAsync();
 
-        //     await _dbContext.SaveChangesAsync();
+            int sameRoleCollisions = 0;
+            int differentRoleCollisions = 0;
 
-        //     return Ok(leaveRequest);
-        // }
+            foreach (var leave in allLeaves)
+            {
+                if ((leave.StartDate <= leaveRequest.EndDate) && (leave.EndDate >= leaveRequest.StartDate))
+                {
+                    var leaveUser = await _userManager.FindByNameAsync(leave.UserName);
+                    if (leaveUser == null) continue;
+
+                    var leaveUserRoles = await _userManager.GetRolesAsync(leaveUser);
+                    if (leaveUserRoles.Contains(userRole))
+                    {
+                        sameRoleCollisions++;
+                    }
+                    else
+                    {
+                        differentRoleCollisions++;
+                    }
+                }
+            }
+
+            string recommendation;
+            if (sameRoleCollisions > 0)
+            {
+                recommendation = "It is recommended to refuse the leave request due to overlapping leaves in the same role.";
+            }
+            else if (differentRoleCollisions > 0)
+            {
+                recommendation = "The employee can leave, but there are overlapping leaves in different roles.";
+            }
+            else
+            {
+                recommendation = "The employee can leave with no overlapping leaves found.";
+            }
+
+            return Ok(new
+            {
+                leaveRequest,
+                SameRoleCollisions = sameRoleCollisions,
+                DifferentRoleCollisions = differentRoleCollisions,
+                Recommendation = recommendation
+            });
+        }
+
     }
 }

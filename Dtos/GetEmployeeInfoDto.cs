@@ -2,13 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MongoDB.Bson;
 
-namespace leave_master_backend.Models
+namespace leave_master_backend.Dtos
 {
-    public class NewEmployeeInfo
+    public class GetEmployeeInfoDto
     {
-        public ObjectId Id { get; set; }
+        public string Id { get; set; } = string.Empty;
         public DateTime StartDate { get; set; }
         public string SignupCode { get; set; } = string.Empty;
     }

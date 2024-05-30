@@ -60,10 +60,12 @@ namespace leave_master_backend.Context
 
             modelBuilder.Entity<LeaveRequest>().ToCollection("LeaveRequests");
             modelBuilder.Entity<Leave>().ToCollection("Leaves");
+            modelBuilder.Entity<NewEmployeeInfo>().ToCollection("NewEmployeeInfos");
         }
 
         // public DbSet<User> Users { get; set; }
         public DbSet<LeaveRequest> LeaveRequests { get; set; }
         public DbSet<Leave> Leaves { get; set; }
+        public DbSet<NewEmployeeInfo> NewEmployeeInfos { get; set; }
     }
 }

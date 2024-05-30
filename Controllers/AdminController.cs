@@ -13,7 +13,8 @@ using System.Text;
 using leave_master_backend.Interfaces;
 using System.Web;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-
+using MongoDB.Bson;
+using leave_master_backend.Dtos;
 
 namespace leave_master_backend.Controllers
 {
@@ -137,7 +138,7 @@ namespace leave_master_backend.Controllers
                 UserName = registerDto.Email,
                 FirstName = registerDto.FirstName ?? "",
                 LastName = registerDto.LastName ?? "",
-                StartDate = registerDto.StartDate.HasValue ? (DateTime)registerDto.StartDate : DateTime.MinValue
+                StartDate = DateTime.UtcNow
             };
 
             var result = await _userManager.CreateAsync(user, registerDto.Password);
@@ -158,6 +159,113 @@ namespace leave_master_backend.Controllers
             }
 
             return BadRequest(result.Errors);
+        }
+
+        // create new employee info
+        [HttpPost("new-employee-info")]
+        [Authorize]
+        public async Task<IActionResult> CreateNewEmployeeInfo([FromBody] NewEmployeeInfo newEmployeeInfo)
+        {
+            var username = User.Identity.Name;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found in claims");
+            }
+
+            var user = await _userManager.FindByNameAsync(username);
+            if (user == null)
+            {
+                return BadRequest("User not found");
+            }
+
+            if (!await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                return Unauthorized();
+            }
+
+            var newEmployee = new NewEmployeeInfo
+            {
+                Id = ObjectId.GenerateNewId(),
+                StartDate = newEmployeeInfo.StartDate,
+                SignupCode = newEmployeeInfo.SignupCode
+            };
+
+            await _dbContext.NewEmployeeInfos.AddAsync(newEmployee);
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(newEmployee);
+        }
+
+        // get new employee info
+        [HttpGet("new-employee-infos")]
+        [Authorize]
+        public async Task<IActionResult> GetNewEmployeeInfo()
+        {
+            var username = User.Identity.Name;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found in claims");
+            }
+
+            var user = await _userManager.FindByNameAsync(username);
+            if (user == null)
+            {
+                return BadRequest("User not found");
+            }
+
+            if (!await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                return Unauthorized();
+            }
+
+            var newEmployeeInfos = await _dbContext.NewEmployeeInfos.ToListAsync();
+
+            // convert ObjectId to string
+            var newEmployeeInfosDto = newEmployeeInfos.Select(newEmployeeInfo => new GetEmployeeInfoDto
+            {
+                Id = newEmployeeInfo.Id.ToString(),
+                StartDate = newEmployeeInfo.StartDate,
+                SignupCode = newEmployeeInfo.SignupCode
+            });
+
+            return Ok(newEmployeeInfosDto);
+        }
+
+        // delte new employee info
+        [HttpDelete("new-employee-info/{id}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteNewEmployeeInfo(string id)
+        {
+            var username = User.Identity.Name;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found in claims");
+            }
+
+            var user = await _userManager.FindByNameAsync(username);
+            if (user == null)
+            {
+                return BadRequest("User not found");
+            }
+
+            if (!await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                return Unauthorized();
+            }
+
+            var newEmployeeInfo = await _dbContext.NewEmployeeInfos.FindAsync(ObjectId.Parse(id));
+            if (newEmployeeInfo == null)
+            {
+                return NotFound();
+            }
+
+            _dbContext.NewEmployeeInfos.Remove(newEmployeeInfo);
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(newEmployeeInfo);
         }
 
 

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using leave_master_backend.Interfaces;
 using System.Web;
+using leave_master_backend.Context;
 
 namespace leave_master_backend.Controllers
 {
@@ -21,14 +22,16 @@ namespace leave_master_backend.Controllers
         private readonly ITokenService _tokenService;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly EmailService _emailService;
+        private readonly MongoDBContext _dbContext;
 
-        public AuthController(UserManager<ApplicationUser> userManager, ITokenService tokenService, RoleManager<ApplicationRole> roleManager, SignInManager<ApplicationUser> signInManager, EmailService emailService)
+        public AuthController(UserManager<ApplicationUser> userManager, ITokenService tokenService, RoleManager<ApplicationRole> roleManager, SignInManager<ApplicationUser> signInManager, EmailService emailService, MongoDBContext dbContext)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _tokenService = tokenService;
             _signInManager = signInManager;
             _emailService = emailService;
+            _dbContext = dbContext;
         }
 
         [HttpPost("register")]
@@ -56,6 +59,16 @@ namespace leave_master_backend.Controllers
                     return BadRequest("Email already exists");
                 }
 
+                // check code in NewEmployeeInfo collection
+                var employeeInfo = _dbContext.NewEmployeeInfos.Where(e => e.SignupCode == registerDto.Code).FirstOrDefault();
+
+                if (employeeInfo == null)
+                {
+                    return BadRequest("Invalid code");
+                }
+
+
+
                 // if (!await _roleManager.RoleExistsAsync("User"))
                 // {
                 //     await _roleManager.CreateAsync(new ApplicationRole { Name = "User" });
@@ -73,7 +86,7 @@ namespace leave_master_backend.Controllers
                     UserName = registerDto.Email,
                     FirstName = registerDto.FirstName ?? "",
                     LastName = registerDto.LastName ?? "",
-                    StartDate = registerDto.StartDate.HasValue ? (DateTime)registerDto.StartDate : DateTime.MinValue
+                    StartDate = employeeInfo.StartDate
                 };
 
                 var createdUser = await _userManager.CreateAsync(user, registerDto.Password);

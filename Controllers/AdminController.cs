@@ -34,14 +34,32 @@ namespace leave_master_backend.Controllers
             _tokenService = tokenService;
         }
 
-        [HttpGet]
-        // [Authorize
-        // (Roles = "Admin")]
+        [HttpGet("get-users")]
         [Authorize]
         public async Task<IActionResult> GetUsers()
         {
-            var users = await Task.Run(() => _userManager.Users.ToList());
-            return Ok(users);
+            var username = User.Identity.Name;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found in claims");
+            }
+
+            var user = await _userManager.FindByNameAsync(username);
+            if (user == null)
+            {
+                return BadRequest("User not found");
+            }
+
+            if (await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                var users = await _userManager.Users.ToListAsync();
+                return Ok(users);
+            }
+            else
+            {
+                return Unauthorized();
+            }
         }
 
         [HttpGet("{username}")]
@@ -126,7 +144,7 @@ namespace leave_master_backend.Controllers
             if (result.Succeeded)
             {
                 var roleResult = await _userManager.AddToRoleAsync(user, "Admin");
-                
+
                 if (roleResult.Succeeded)
                 {
                     return Ok(new NewUserDto

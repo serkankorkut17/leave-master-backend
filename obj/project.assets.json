@@ -4968,24 +4968,26 @@
     ]
   },
   "packageFolders": {
-    "/Users/serkankorkut/.nuget/packages/": {}
+    "C:\\Users\\srknk\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/serkankorkut/Documents/VSCode/Software Project/leave-master-backend/leave-master-backend.csproj",
+      "projectUniqueName": "C:\\Users\\srknk\\OneDrive\\Belgeler\\Visual Studio Code\\SW Project\\leave-master-backend\\leave-master-backend.csproj",
       "projectName": "leave-master-backend",
-      "projectPath": "/Users/serkankorkut/Documents/VSCode/Software Project/leave-master-backend/leave-master-backend.csproj",
-      "packagesPath": "/Users/serkankorkut/.nuget/packages/",
-      "outputPath": "/Users/serkankorkut/Documents/VSCode/Software Project/leave-master-backend/obj/",
+      "projectPath": "C:\\Users\\srknk\\OneDrive\\Belgeler\\Visual Studio Code\\SW Project\\leave-master-backend\\leave-master-backend.csproj",
+      "packagesPath": "C:\\Users\\srknk\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\srknk\\OneDrive\\Belgeler\\Visual Studio Code\\SW Project\\leave-master-backend\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/serkankorkut/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\srknk\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -4998,6 +5000,11 @@
         "warnAsError": [
           "NU1605"
         ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -5082,7 +5089,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/opt/homebrew/Cellar/dotnet/8.0.4/libexec/sdk/8.0.104/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.205/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

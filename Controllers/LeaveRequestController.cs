@@ -21,6 +21,18 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using leave_master_backend.Dtos.LeaveRequests;
+using leave_master_backend.Models;
+using leave_master_backend.Context;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using MongoDB.Bson;
 
 
 
@@ -38,14 +50,33 @@ namespace leave_master_backend.Controllers
             _dbContext = dbContext;
             _userManager = userManager;
         }
-        //** GET ALL LEAVE REQUESTS !!!!!!!!!**//
+
+        //** GET ALL LEAVE REQUESTS **//
         [HttpGet("all")]
         [Authorize]
         public async Task<IActionResult> GetLeaveRequests()
         {
-            //** !!!!!!!!!hr ve üstü olmalı **//
+            // var user = await _userManager.GetUserAsync(User);
+            // var roles = await _userManager.GetRolesAsync(user);
+
+            // if (!roles.Contains("Admin"))
+            // {
+            //     return Forbid();
+            // }
+
             var leaveRequests = await _dbContext.LeaveRequests.ToListAsync();
-            return Ok(leaveRequests);
+
+            var leaveRequestsDto = leaveRequests.Select(lr => new GetLeaveRequestDto
+            {
+                Id = lr.Id.ToString(),
+                UserName = lr.UserName,
+                StartDate = lr.StartDate,
+                EndDate = lr.EndDate,
+                LeaveDays = lr.LeaveDays,
+                Reason = lr.Reason,
+            }).ToList();
+
+            return Ok(leaveRequestsDto);
         }
 
         //** GET EMPLOYEE'S LEAVE REQUEST **//

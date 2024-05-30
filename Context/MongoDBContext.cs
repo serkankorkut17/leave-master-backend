@@ -57,11 +57,13 @@ namespace leave_master_backend.Context
             modelBuilder.Entity<LeaveRequest>()
                 .Property(lr => lr.UpdatedAt)
                 .IsRequired();
-                
+
             modelBuilder.Entity<LeaveRequest>().ToCollection("LeaveRequests");
+            modelBuilder.Entity<Leave>().ToCollection("Leaves");
         }
 
         // public DbSet<User> Users { get; set; }
         public DbSet<LeaveRequest> LeaveRequests { get; set; }
+        public DbSet<Leave> Leaves { get; set; }
     }
 }

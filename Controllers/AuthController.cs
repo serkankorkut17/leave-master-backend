@@ -41,6 +41,11 @@ namespace leave_master_backend.Controllers
                     return BadRequest(ModelState);
                 }
 
+                if (registerDto.Password is null)
+                {
+                    return BadRequest("Password cannot be null");
+                }
+
                 if (registerDto.Password != registerDto.ConfirmPassword)
                 {
                     return BadRequest("Passwords do not match");
@@ -70,11 +75,6 @@ namespace leave_master_backend.Controllers
                     LastName = registerDto.LastName ?? "",
                     StartDate = registerDto.StartDate.HasValue ? (DateTime)registerDto.StartDate : DateTime.MinValue
                 };
-
-                if (registerDto.Password is null)
-                {
-                    return BadRequest("Password cannot be null");
-                }
 
                 var createdUser = await _userManager.CreateAsync(user, registerDto.Password);
 

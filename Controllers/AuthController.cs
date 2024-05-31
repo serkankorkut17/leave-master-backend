@@ -67,14 +67,6 @@ namespace leave_master_backend.Controllers
                     return BadRequest("Invalid code");
                 }
 
-
-
-                // if (!await _roleManager.RoleExistsAsync("User"))
-                // {
-                //     await _roleManager.CreateAsync(new ApplicationRole { Name = "User" });
-
-                // }
-
                 if (!await _roleManager.RoleExistsAsync(registerDto.EmployeeRole))
                 {
                     await _roleManager.CreateAsync(new ApplicationRole { Name = registerDto.EmployeeRole });
@@ -90,11 +82,12 @@ namespace leave_master_backend.Controllers
                 };
 
                 var createdUser = await _userManager.CreateAsync(user, registerDto.Password);
+                // remove employee info from NewEmployeeInfo collection
+                _dbContext.NewEmployeeInfos.Remove(employeeInfo);
+                _dbContext.SaveChanges();
 
                 if (createdUser.Succeeded)
                 {
-                    // delete the code from NewEmployeeInfo collection
-                    _dbContext.NewEmployeeInfos.Remove(employeeInfo);
                     // var roleResult = await _userManager.AddToRoleAsync(user, "User");
                     var roleResult = await _userManager.AddToRoleAsync(user, registerDto.EmployeeRole);
 
